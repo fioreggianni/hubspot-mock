@@ -40,42 +40,33 @@ Authentication & Authorization flows
 
 Create a `.env` file in this directory and add your own variables:
 ```sh
-export WEBHOOK_URL=http://localhost:80
-export CUSTOMER_ID=1
-export APP_ID=1
+WEBHOOK_URL=http://localhost:80
+CUSTOMER_ID=1
+APP_ID=1
 ```
 `WEBHOOK_URL` is the URL where you plan to receive notifications back, if your app is running on port 80, you can use http://localhost:80 to have hubspot events notified to your app as they happen. `CUSTOMER_ID` and `APP_ID` need to be specified because the current mock is unable to understand who is the logged in customer and which is your App ID (these info do not belong to Hubspot API requests apparently, and the Hubspot token is not a standard JWT I could decode).
 
 
 Run this command to install all dependences:
 
-```
+```bash
 npm install
 ```
-then run it with 
+set your env vars out of your `.env` file
+```bash
+export $(cat .env | xargs)
 ```
-source .env && npm run dev
+
+then run the app server with
+```bash
+npm run dev
 ```
-and it becomes available as an API at `http://localhost:8080`.
+and it becomes available as a REST API at `http://localhost:8080`.
 
 Or, alternatively, run it in a Docker container with
-```
+```bash
 docker build -t . hubspot-mock
-docker run -p 8080:8080 hubspot-mock
-```
-or include in a `docker-compose.yml` file along with your app
-```
-app:
-    image: you/yourapp
-
-hubspot.local:
-    build: .
-    environment:
-      - CUSTOMER_ID=1
-      - APP_ID=123
-      - "WEBHOOK_URL=http://app/hook"
-    ports:
-      - 8080:8080
+docker run -p 8080:8080 --env-file=.env hubspot-mock
 ```
 
 If your client makes use of the [Hubspot Client SDK for NodeJS](https://github.com/HubSpot/hubspot-api-nodejs), you will need to override the `https://api.hubapi.com` default base URL and use the address of this API, e.g. `http://localhost:8080` (or `http://hubspot.local:8080` if you use a docker compose):
